@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>上海大学2026秋季课程表</title>
+<style>
+:root {
+  --bg: #f6fff0;
+  --card: #ffffff;
+  --ink: #2d4a2d;
+  --ink-2: #5a7a5a;
+  --ink-3: #9eb89e;
+  --line: #e8f5e0;
+  --accent: #558b2f;
+  --accent-soft: #e8f5e0;
+  --offline: #ffb74d;
+  --radius: 24px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(120,180,80,.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(255,210,80,.08) 0%, transparent 40%);
+  color: var(--ink);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+.wrap { max-width: 680px; margin: 0 auto; padding: 18px 14px 40px; }
+
+/* ===== Hero with green-yellow theme + animated SVG ===== */
+.hero {
+  background: linear-gradient(135deg, #7cb342 0%, #9ccc65 45%, #dce775 100%);
+  border-radius: 28px;
+  padding: 36px 28px 32px;
+  color: #fff;
+  margin-bottom: 18px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(124,179,66,.3);
+}
+.hero svg { position: absolute; pointer-events: none; }
+/* 漂浮云朵 */
+.cloud1 { top: 18px; left: 30px; animation: drift1 12s ease-in-out infinite; }
+.cloud2 { top: 60px; right: 50px; animation: drift2 15s ease-in-out infinite; opacity: .8; }
+.cloud3 { bottom: 30px; left: 60px; animation: drift1 18s ease-in-out infinite; opacity: .6; }
+@keyframes drift1 {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(25px); }
+}
+@keyframes drift2 {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-20px); }
+}
+/* 闪烁星星 */
+.star { animation: twinkle 2.5s ease-in-out infinite; transform-origin: center; }
+.star:nth-of-type(2) { animation-delay: .5s; }
+.star:nth-of-type(3) { animation-delay: 1s; }
+.star:nth-of-type(4) { animation-delay: 1.5s; }
+@keyframes twinkle {
+  0%, 100% { opacity: .3; transform: scale(.8) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.1) rotate(20deg); }
+}
+/* 小太阳旋转 */
+.sun { top: 20px; right: 30px; animation: spin 20s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hero-emoji { display: none; }
+.hero h1 { font-size: 22px; font-weight: 800; letter-spacing: .5px; position: relative; text-shadow: 0 2px 8px rgba(0,0,0,.1); }
+.hero .sub { font-size: 13px; opacity: .95; margin-top: 6px; position: relative; }
+.hero-tags { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; position: relative; }
+.hero-tag {
+  background: rgba(255,255,255,.25);
+  backdrop-filter: blur(4px);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  border: 1px solid rgba(255,255,255,.35);
+}
+
+/* ===== Month Nav ===== */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(124,179,66,.12);
+}
+.month-nav .btn {
+  width: 42px; height: 42px;
+  border: none;
+  background: var(--accent-soft);
+  border-radius: 50%;
+  font-size: 20px;
+  color: var(--accent);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.month-nav .btn:hover:not(:disabled) { background: var(--accent); color: #fff; transform: scale(1.1) rotate(5deg); }
+.month-nav .btn:disabled { opacity: .25; cursor: default; }
+.month-title { font-size: 20px; font-weight: 800; }
+.month-title small { font-size: 13px; color: var(--ink-3); font-weight: 500; margin-left: 6px; }
+.today-btn {
+  border: none;
+  background: linear-gradient(135deg, #7cb342, #9ccc65);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(124,179,66,.4);
+  transition: transform .15s;
+}
+.today-btn:active { transform: scale(.93); }
+
+/* ===== Calendar ===== */
+.calendar {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(124,179,66,.12);
+  padding: 16px;
+  touch-action: pan-y;
+}
+.cal-grid.swipe-left { animation: slideInLeft .25s ease; }
+.cal-grid.swipe-right { animation: slideInRight .25s ease; }
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.cal-head {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 8px;
+}
+.cal-head div {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-3);
+  padding: 6px 0;
+}
+.cal-head div.weekend { color: var(--accent); }
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+.day-cell {
+  aspect-ratio: 1;
+  border-radius: 16px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all .2s;
+  border: 2px solid transparent;
+  background: #faf7ff;
+}
+.day-cell:hover { background: var(--accent-soft); transform: scale(1.04); }
+.day-cell.other { opacity: .2; }
+.day-cell.past { opacity: .4; }
+.day-cell.past .cblk { filter: grayscale(1); }
+.day-cell.today {
+  background: linear-gradient(135deg, #7cb342, #9ccc65);
+  border-color: #7cb342;
+  box-shadow: 0 4px 14px rgba(124,179,66,.4);
+}
+.day-cell.today .day-num { color: #fff; }
+.day-num {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  overflow: hidden;
+}
+.cblk {
+  border-radius: 6px;
+  padding: 2px 5px;
+  font-size: 9px;
+  line-height: 1.3;
+  color: #fff;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cblk.offline { background: var(--offline) !important; }
+.day-cell.today .cblk { background: rgba(255,255,255,.3) !important; }
+.day-cell.today .cblk.offline { background: var(--offline) !important; }
+
+/* ===== Legend ===== */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 14px;
+  padding: 16px 18px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(124,179,66,.12);
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); font-weight: 500; }
+.legend-chip { width: 16px; height: 16px; border-radius: 6px; }
+
+/* ===== Upcoming ===== */
+.upcoming {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(124,179,66,.12);
+  padding: 20px;
+  margin-top: 14px;
+}
+.upcoming-title {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.up-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all .15s;
+  margin-bottom: 4px;
+}
+.up-item:hover { background: var(--accent-soft); }
+.up-item:last-child { margin-bottom: 0; }
+.up-date {
+  min-width: 54px;
+  text-align: center;
+  background: linear-gradient(135deg, #e8f5e0, #f1f8e9);
+  border-radius: 14px;
+  padding: 8px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.up-date .d { font-size: 18px; display: block; font-weight: 800; }
+.up-info { flex: 1; }
+.up-name { font-weight: 700; font-size: 14px; }
+.up-teacher { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+.up-right { text-align: right; }
+.up-tag {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  display: inline-block;
+}
+.up-tag.offline { background: #fff3e0; color: #e65100; }
+.up-tag.online { background: #e8f5e0; color: #558b2f; }
+.up-time { color: var(--ink-3); font-size: 12px; margin-top: 4px; }
+
+/* ===== Sheet ===== */
+.mask {
+  position: fixed; inset: 0;
+  background: rgba(50,80,30,.3);
+  backdrop-filter: blur(3px);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+.mask.show { opacity: 1; pointer-events: auto; }
+.sheet {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-radius: 32px 32px 0 0;
+  z-index: 101;
+  padding: 20px 22px 34px;
+  transform: translateY(100%);
+  transition: transform .35s cubic-bezier(.22,1,.36,1);
+  max-height: 78vh;
+  overflow-y: auto;
+}
+.sheet.show { transform: translateY(0); }
+.sheet-grip {
+  width: 48px; height: 6px;
+  background: #f0e8fa;
+  border-radius: 3px;
+  margin: 0 auto 18px;
+}
+.sheet-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.sheet-date { font-size: 22px; font-weight: 800; }
+.sheet-week { font-size: 14px; color: var(--ink-3); }
+.sheet-badge {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+.sheet-badge.offline { background: #fff3e0; color: #e65100; }
+.sheet-badge.online { background: #e8f5e0; color: #558b2f; }
+
+.sheet-course {
+  border-radius: 20px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  border-left: 5px solid;
+  animation: pop .35s ease both;
+}
+.sheet-course:nth-child(2) { animation-delay: .06s; }
+.sheet-course:nth-child(3) { animation-delay: .12s; }
+@keyframes pop {
+  from { opacity: 0; transform: translateY(12px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.sc-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.sc-name { font-size: 17px; font-weight: 800; }
+.sc-time {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 5px 12px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+.sc-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
+.sc-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+.sc-room {
+  background: #f1f8e9;
+  padding: 4px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.sc-note {
+  font-size: 11px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+.sheet-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-3);
+}
+.sheet-empty .big { font-size: 44px; margin-bottom: 10px; }
+
+@media (max-width: 480px) {
+  .wrap { padding: 10px; }
+  .hero { padding: 26px 22px; }
+  .hero h1 { font-size: 18px; }
+  .day-num { font-size: 12px; }
+  .cblk { font-size: 8px; padding: 1px 3px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <!-- 动画云朵 -->
+    <svg class="cloud1" width="70" height="40" viewBox="0 0 70 40" fill="white" fill-opacity="0.5">
+      <ellipse cx="22" cy="26" rx="16" ry="10"/>
+      <ellipse cx="38" cy="20" rx="13" ry="9"/>
+      <ellipse cx="52" cy="28" rx="10" ry="7"/>
+    </svg>
+    <svg class="cloud2" width="55" height="32" viewBox="0 0 55 32" fill="white" fill-opacity="0.45">
+      <ellipse cx="18" cy="20" rx="13" ry="8"/>
+      <ellipse cx="32" cy="15" rx="10" ry="7"/>
+      <ellipse cx="43" cy="22" rx="8" ry="6"/>
+    </svg>
+    <svg class="cloud3" width="60" height="35" viewBox="0 0 60 35" fill="white" fill-opacity="0.35">
+      <ellipse cx="20" cy="22" rx="14" ry="9"/>
+      <ellipse cx="35" cy="17" rx="11" ry="8"/>
+      <ellipse cx="46" cy="24" rx="8" ry="6"/>
+    </svg>
+    <!-- 闪烁星星 -->
+    <svg class="star" style="top:24px;left:45%" width="14" height="14" viewBox="0 0 24 24" fill="#fff8e1">
+      <path d="M12 2l2.5 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2.5-7.5L2 9h7z"/>
+    </svg>
+    <svg class="star" style="top:80px;left:22%" width="10" height="10" viewBox="0 0 24 24" fill="#fff8e1">
+      <path d="M12 2l2.5 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2.5-7.5L2 9h7z"/>
+    </svg>
+    <svg class="star" style="top:110px;right:22%" width="12" height="12" viewBox="0 0 24 24" fill="#fff8e1">
+      <path d="M12 2l2.5 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2.5-7.5L2 9h7z"/>
+    </svg>
+    <svg class="star" style="top:50px;left:68%" width="9" height="9" viewBox="0 0 24 24" fill="#fff8e1">
+      <path d="M12 2l2.5 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2.5-7.5L2 9h7z"/>
+    </svg>
+    <!-- 旋转小太阳 -->
+    <svg class="sun" width="56" height="56" viewBox="0 0 56 56">
+      <g fill="#fff8e1">
+        <circle cx="28" cy="28" r="12" fill-opacity="0.85"/>
+        <g stroke="#fff8e1" stroke-width="2.5" stroke-linecap="round">
+          <line x1="28" y1="6" x2="28" y2="12"/>
+          <line x1="28" y1="44" x2="28" y2="50"/>
+          <line x1="6" y1="28" x2="12" y2="28"/>
+          <line x1="44" y1="28" x2="50" y2="28"/>
+          <line x1="12" y1="12" x2="16" y2="16"/>
+          <line x1="40" y1="40" x2="44" y2="44"/>
+          <line x1="12" y1="44" x2="16" y2="40"/>
+          <line x1="40" y1="16" x2="44" y2="12"/>
+        </g>
+      </g>
+    </svg>
+
+    <h1>上海大学2026秋季课程表</h1>
+    <div class="sub">视觉传达设计(专升本) · 26-27学年秋季学期</div>
+    <div class="hero-tags">
+      <span class="hero-tag">🎓 2025级</span>
+      <span class="hero-tag">👥 91人</span>
+      <span class="hero-tag">👩‍🏫 张老师</span>
+    </div>
+  </div>
+
+  <div class="month-nav">
+    <button class="btn" id="prevBtn">&lsaquo;</button>
+    <div class="month-title" id="monthTitle"></div>
+    <button class="btn" id="nextBtn">&rsaquo;</button>
+    <button class="today-btn" id="todayBtn">今天</button>
+  </div>
+
+  <div class="calendar">
+    <div class="cal-head">
+      <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div>
+      <div class="weekend">六</div><div class="weekend">日</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="upcoming">
+    <div class="upcoming-title">✨ 近期课程</div>
+    <div id="upcomingList"></div>
+  </div>
+
+</div>
+
+<div class="mask" id="mask"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-grip"></div>
+  <div id="sheetContent"></div>
+</div>
+
+<script>
+const COURSE_META = {
+  '大学英语B(2)':       { color: '#7c8ff5', teacher: '陈佳丽', title: '中级讲师', short: '英语' },
+  '马克思主义基本原理*': { color: '#66bb6a', teacher: '牛聪',   title: '中级讲师', short: '马原' },
+  '图像处理(PS)*':      { color: '#ffa726', teacher: '费成浩', title: '高级讲师', short: 'PS' },
+  '形态构成*':          { color: '#ec6998', teacher: '赵晓',   title: '中级职称', short: '构成' },
+  '商业插画':           { color: '#4dd0e1', teacher: '赵晓',   title: '中级职称', short: '插画' },
+  '首日教育活动':       { color: '#ab47bc', teacher: '教务处', title: '—',       short: '首日' }
+};
+
+const COURSE_DATES = {
+  '2026-09-14': [
+    { name:'首日教育活动', time:'20:00-21:00', room:'腾讯会议', meetingId:'161-670-177' }
+  ],
+  '2026-09-19': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-09-29': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-10-10': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin', note:'录播课' }
+  ],
+  '2026-10-11': [
+    { name:'大学英语B(2)', time:'13:00-16:40', room:'一楼图书馆', offline: true }
+  ],
+  '2026-10-12': [
+    { name:'形态构成*', time:'18:55-21:40', room:'classin' }
+  ],
+  '2026-10-13': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-10-17': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-10-18': [
+    { name:'商业插画', time:'8:00-11:40', room:'图书馆一楼', offline: true }
+  ],
+  '2026-10-20': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-10-21': [
+    { name:'图像处理(PS)*', time:'18:55-21:40', room:'classin' }
+  ],
+  '2026-10-24': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-10-27': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-10-28': [
+    { name:'马克思主义基本原理*', time:'18:55-21:40', room:'classin' }
+  ],
+  '2026-10-31': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-11-03': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-11-07': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-11-10': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-11-14': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-11-17': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-11-21': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-11-24': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-11-25': [
+    { name:'马克思主义基本原理*', time:'18:55-21:40', room:'classin' }
+  ],
+  '2026-11-28': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-12-01': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-12-05': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-12-06': [
+    { name:'商业插画', time:'8:00-11:40', room:'图书馆一楼', offline: true },
+    { name:'大学英语B(2)', time:'13:00-16:40', room:'一楼图书馆', offline: true }
+  ],
+  '2026-12-08': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-12-12': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-12-15': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-12-16': [
+    { name:'马克思主义基本原理*', time:'18:55-21:40', room:'classin' }
+  ],
+  '2026-12-19': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-12-20': [
+    { name:'商业插画', time:'8:00-11:40', room:'图书馆一楼', offline: true }
+  ],
+  '2026-12-21': [
+    { name:'形态构成*', time:'18:55-21:40', room:'classin' }
+  ],
+  '2026-12-22': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ],
+  '2026-12-23': [
+    { name:'图像处理(PS)*', time:'18:55-21:40', room:'classin' }
+  ],
+  '2026-12-26': [
+    { name:'商业插画', time:'13:00-16:40', room:'classin' }
+  ],
+  '2026-12-27': [
+    { name:'大学英语B(2)', time:'13:00-16:40', room:'一楼图书馆', offline: true }
+  ],
+  '2026-12-29': [
+    { name:'大学英语B(2)', time:'18:00-21:40', room:'classin' }
+  ]
+};
+
+const MONTHS = [
+  { y: 2026, m: 8 }, { y: 2026, m: 9 }, { y: 2026, m: 10 }, { y: 2026, m: 11 }
+];
+let curMonthIdx = 0;
+const WEEK_CN = ['日','一','二','三','四','五','六'];
+
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function dateKey(y, m, d) { return y + '-' + pad(m+1) + '-' + pad(d); }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function renderCalendar() {
+  const { y, m } = MONTHS[curMonthIdx];
+  document.getElementById('monthTitle').innerHTML = (m+1) + '月 <small>' + y + '</small>';
+  document.getElementById('prevBtn').disabled = curMonthIdx === 0;
+  document.getElementById('nextBtn').disabled = curMonthIdx === MONTHS.length - 1;
+
+  const firstDow = new Date(y, m, 1).getDay();
+  const offset = (firstDow + 6) % 7;
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const prevDays = new Date(y, m, 0).getDate();
+  const today = new Date();
+  const todayKey = dateKey(today.getFullYear(), today.getMonth(), today.getDate());
+
+  let html = '';
+  for (let i = 0; i < 42; i++) {
+    let cellDay = i - offset + 1;
+    let cellY = y, cellM = m;
+    let cls = 'day-cell';
+    if (cellDay < 1) {
+      cellM = m - 1;
+      if (cellM < 0) { cellM = 11; cellY = y - 1; }
+      cellDay = prevDays + cellDay;
+      cls += ' other';
+    } else if (cellDay > daysInMonth) {
+      cellM = m + 1;
+      if (cellM > 11) { cellM = 0; cellY = y + 1; }
+      cellDay = cellDay - daysInMonth;
+      cls += ' other';
+    }
+    const key = dateKey(cellY, cellM, cellDay);
+    const courses = COURSE_DATES[key];
+    const isToday = key === todayKey;
+    const isPast = key < todayKey && !isToday;
+    if (isToday) cls += ' today';
+    if (isPast) cls += ' past';
+
+    let blocksHtml = '';
+    if (courses) {
+      courses.forEach(c => {
+        const meta = COURSE_META[c.name];
+        const bg = c.offline ? '#ffb74d' : meta.color;
+        blocksHtml += '<div class="cblk' + (c.offline ? ' offline' : '') + '" style="background:' + bg + '">' +
+          esc(meta.short) + '</div>';
+      });
+    }
+    html += '<div class="' + cls + '" data-key="' + key + '">' +
+      '<span class="day-num">' + cellDay + '</span>' +
+      (blocksHtml ? '<div class="blocks">' + blocksHtml + '</div>' : '') +
+      '</div>';
+  }
+  document.getElementById('calGrid').innerHTML = html;
+  document.querySelectorAll('.day-cell').forEach(el => {
+    el.addEventListener('click', () => openSheet(el.dataset.key));
+  });
+}
+
+function renderLegend() {
+  let html = '';
+  for (const [name, meta] of Object.entries(COURSE_META)) {
+    html += '<div class="legend-item"><span class="legend-chip" style="background:' + meta.color + '"></span>' + name + '</div>';
+  }
+  html += '<div class="legend-item"><span class="legend-chip" style="background:#ffb74d"></span>线下课（图书馆）</div>';
+  document.getElementById('legend').innerHTML = html;
+}
+
+function openSheet(key) {
+  const courses = COURSE_DATES[key] || [];
+  const d = new Date(key + 'T00:00:00');
+  const hasOffline = courses.some(c => c.offline);
+  let html = '<div class="sheet-head">';
+  html += '<div class="sheet-date">' + (d.getMonth()+1) + '月' + d.getDate() + '日</div>';
+  html += '<div class="sheet-week">星期' + WEEK_CN[d.getDay()] + '</div>';
+  if (courses.length > 0) {
+    html += '<span class="sheet-badge ' + (hasOffline ? 'offline' : 'online') + '">' +
+      (hasOffline ? '线下课' : '线上课') + '</span>';
+  }
+  html += '</div>';
+
+  if (courses.length === 0) {
+    html += '<div class="sheet-empty"><div class="big">🍵</div>这一天没有课程安排，好好休息～</div>';
+  } else {
+    courses.forEach(c => {
+      const meta = COURSE_META[c.name];
+      const color = c.offline ? '#ffb74d' : meta.color;
+      html += '<div class="sheet-course" style="border-left-color:' + color + ';background:' + color + '14">';
+      html += '<div class="sc-top">';
+      html += '<div class="sc-name">' + esc(c.name) + '</div>';
+      html += '<div class="sc-time">' + c.time + '</div>';
+      html += '</div>';
+      html += '<div class="sc-row">';
+      html += '<span class="sc-avatar" style="background:' + color + '">' + meta.teacher.charAt(0) + '</span>';
+      html += '<span><b>' + meta.teacher + '</b> · ' + meta.title + '</span>';
+      html += '</div>';
+      html += '<div class="sc-row">';
+      html += '<span class="sc-room">📍 ' + esc(c.room) + '</span>';
+      if (c.meetingId) html += '<span class="sc-room" style="background:#ede7f6;color:#5e35b1">🎥 会议号 ' + esc(c.meetingId) + '</span>';
+      if (c.note) html += '<span class="sc-note">' + c.note + '</span>';
+      html += '</div>';
+      html += '</div>';
+    });
+  }
+  document.getElementById('sheetContent').innerHTML = html;
+  document.getElementById('sheet').classList.add('show');
+  document.getElementById('mask').classList.add('show');
+}
+function closeSheet() {
+  document.getElementById('sheet').classList.remove('show');
+  document.getElementById('mask').classList.remove('show');
+}
+document.getElementById('mask').addEventListener('click', closeSheet);
+
+function renderUpcoming() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const list = Object.keys(COURSE_DATES)
+    .filter(k => new Date(k + 'T00:00:00') >= today)
+    .sort()
+    .slice(0, 6);
+  let html = '';
+  if (list.length === 0) {
+    html = '<div style="color:#a89fbf;font-size:13px;padding:8px 0">本学期课程已结束啦 🎉</div>';
+  } else {
+    list.forEach(k => {
+      const d = new Date(k + 'T00:00:00');
+      const courses = COURSE_DATES[k];
+      const c = courses[0];
+      const meta = COURSE_META[c.name];
+      const hasOffline = courses.some(x => x.offline);
+      html += '<div class="up-item" data-key="' + k + '">';
+      html += '<div class="up-date"><span class="d">' + d.getDate() + '</span>' + (d.getMonth()+1) + '月</div>';
+      html += '<div class="up-info">';
+      html += '<div class="up-name">' + esc(c.name) + (courses.length > 1 ? ' 等' + courses.length + '门' : '') + '</div>';
+      html += '<div class="up-teacher">👩‍🏫 ' + meta.teacher + ' · ' + meta.title + '</div>';
+      html += '</div>';
+      html += '<div class="up-right">';
+      html += '<span class="up-tag ' + (hasOffline ? 'offline' : 'online') + '">' + (hasOffline ? '线下' : '线上') + '</span>';
+      html += '<div class="up-time">' + c.time + '</div>';
+      html += '</div>';
+      html += '</div>';
+    });
+  }
+  document.getElementById('upcomingList').innerHTML = html;
+  document.querySelectorAll('.up-item').forEach(el => {
+    el.addEventListener('click', () => openSheet(el.dataset.key));
+  });
+}
+
+function goMonth(direction) {
+  const newIdx = curMonthIdx + direction;
+  if (newIdx < 0 || newIdx >= MONTHS.length) return;
+  curMonthIdx = newIdx;
+  const grid = document.getElementById('calGrid');
+  grid.classList.remove('swipe-left', 'swipe-right');
+  void grid.offsetWidth; // reflow to restart animation
+  grid.classList.add(direction > 0 ? 'swipe-left' : 'swipe-right');
+  renderCalendar();
+}
+
+document.getElementById('prevBtn').addEventListener('click', () => goMonth(-1));
+document.getElementById('nextBtn').addEventListener('click', () => goMonth(1));
+
+// 触摸滑动切换月份
+const calEl = document.querySelector('.calendar');
+let touchStartX = 0, touchStartY = 0;
+calEl.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+calEl.addEventListener('touchend', (e) => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  // 水平滑动距离 > 50px，且比垂直滑动明显
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    if (dx < 0) goMonth(1);   // 左滑 -> 下个月
+    else goMonth(-1);          // 右滑 -> 上个月
+  }
+}, { passive: true });
+
+document.getElementById('todayBtn').addEventListener('click', () => {
+  const now = new Date();
+  const idx = MONTHS.findIndex(m => m.y === now.getFullYear() && m.m === now.getMonth());
+  if (idx >= 0) { curMonthIdx = idx; renderCalendar(); }
+});
+
+(function init() {
+  const now = new Date();
+  const idx = MONTHS.findIndex(m => m.y === now.getFullYear() && m.m === now.getMonth());
+  curMonthIdx = idx >= 0 ? idx : 0;
+  renderCalendar();
+  renderLegend();
+  renderUpcoming();
+})();
+</script>
+</body>
+</html>
